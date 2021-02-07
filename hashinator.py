@@ -26,16 +26,16 @@ def sha224(text):
 def ntlm(text):
     # BUG this might be a bit weird, NTLM hashes are typically uppercase. Please triple check your NTLMs :)
     text = text.decode("utf-8")
-    return binascii.hexlify(hashlib.new('md4', text.encode('utf-16le')).digest().upper()).upper(), "NTLM"
-
-
-
+    hash = hashlib.new('md4', text.encode('utf-16le')).digest()
+    return binascii.hexlify(hash).upper(), "NTLM"
 
 with open(filename) as f:
     content = f.read().splitlines()
 
 hashing = [md5, sha1, sha256, sha512, sha384, sha224, ntlm]
 output = []
+
+debug = False
 
 for i in content:
     plaintext = bytes(i, "utf-8").strip()
@@ -47,11 +47,12 @@ for i in content:
                 hashed_value = hashed_value.decode("utf-8")
             except:
                 continue
-        output.append({"Hash": to_insert[0], "Plaintext": i, "Type": to_insert[1], "Verified": True})
-
+    
+        output.append({"Hash": hashed_value, "Plaintext": i, "Type": to_insert[1], "Verified": True})
 
 new_filename = filename.split(".")[0]
 
 with open(new_filename + ".json", 'w') as outfile:
     ujson.dump(output, outfile, reject_bytes=False)
     
+print("I am done!")

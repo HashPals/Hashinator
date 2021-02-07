@@ -4,7 +4,7 @@ import re
 import ujson
 
 # TODO Change this file name to the one you're working on
-filename = "500-worst-passwords.txt"
+filename = input("Enter file path --> ")
 
 # Basically all puncuation, lowercase, uppercaese, numbers, emails, etc.
 # Removes Asian characters, emojis, etc etc.

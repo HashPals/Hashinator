@@ -4,7 +4,7 @@ import re
 import ujson
 
 # TODO Change this file name to the one you're working on
-filename = "500-worst-passwords.txt"
+filename = "M3G_THI_CTH_WORDLIST_CLEANED.txt"
 
 # Basically all puncuation, lowercase, uppercaese, numbers, emails, etc.
 # Removes Asian characters, emojis, etc etc.
@@ -43,7 +43,7 @@ def ntlm(text):
     return binascii.hexlify(hash).upper(), "NTLM"
 
 
-with open(filename) as f:
+with open(filename, 'rb') as f:
     content = f.read().splitlines()
 
 hashing = [md5, sha1, sha256, sha512, ntlm]
@@ -53,6 +53,10 @@ debug = False
 
 for i in content:
     # If it is "weird" do not add it to the DB.
+    try:
+        i = i.decode("utf-8")
+    except:
+        continue
     if not regexp.search(i):
         continue
     plaintext = bytes(i, "utf-8").strip()

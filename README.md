@@ -8,3 +8,5 @@
 8. Click upload
 9. Wait a couple seconds
 10. Should be in DB, query the API :D
+
+Note: If plaintext is not UTF-8 it is basically ignored.

@@ -1,10 +1,14 @@
 import binascii
 import hashlib
-
+import re
 import ujson
 
 # TODO Change this file name to the one you're working on
 filename = "500-worst-passwords.txt"
+
+# Basically all puncuation, lowercase, uppercaese, numbers, emails, etc.
+# Removes Asian characters, emojis, etc etc.
+regexp = re.compile(r"""^[A-Za-z.\s_@"!£$%^&*(){}#~';:?>.<,|\/\][123456789+=\-_-]+$""")
 
 
 # TODO Add more hashing methods if ya find them
@@ -48,6 +52,9 @@ output = []
 debug = False
 
 for i in content:
+    # If it is "weird" do not add it to the DB.
+    if not regexp.search(i):
+        continue
     plaintext = bytes(i, "utf-8").strip()
     for hash in hashing:
         to_insert = hash(plaintext)

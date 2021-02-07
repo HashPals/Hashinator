@@ -24,7 +24,9 @@ def sha224(text):
     return hashlib.sha224(text).hexdigest().strip(), "SHA-224"
 
 def ntlm(text):
-    return binascii.hexlify(hashlib.new('md4', text.decode("utf-8").encode('utf-16le')).digest()), "NTLM"
+    # BUG this might be a bit weird, NTLM hashes are typically uppercase. Please triple check your NTLMs :)
+    text = text.decode("utf-8")
+    return binascii.hexlify(hashlib.new('md4', text.encode('utf-16le')).digest().upper()).upper(), "NTLM"
 
 
 

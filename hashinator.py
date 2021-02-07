@@ -53,6 +53,6 @@ for i in content:
 new_filename = filename.split(".")[0]
 
 with open(new_filename + ".json", 'w') as outfile:
-    ujson.dump(output, outfile, reject_bytes=False)
+    ujson.dump(output, outfile)
     
 print("I am done!")

@@ -4,6 +4,7 @@ import binascii
 import hashlib
 import re
 import ujson
+import os
 
 # TODO Change this file name to the one you're working on
 filename = input("Enter file path --> ")
@@ -45,44 +46,49 @@ def ntlm(text):
     return binascii.hexlify(hash).upper(), "NTLM"
 
 
-with open(filename, 'rb') as f:
-    content = f.read().splitlines()
+
 
 hashing = [md5, sha1, sha256, sha512, ntlm]
-output = []
+text_files = [f for f in os.listdir(path) if f.endswith('.txt')]
 
-debug = False
+for text_file in text_files:
 
-for i in content:
-    # If it is "weird" do not add it to the DB.
-    try:
-        i = i.decode("utf-8")
-    except:
-        continue
-    if not regexp.search(i):
-        continue
-    plaintext = bytes(i, "utf-8").strip()
-    for hash in hashing:
-        to_insert = hash(plaintext)
-        hashed_value = to_insert[0]
-        if not isinstance(hashed_value, str):
-            try:
-                hashed_value = hashed_value.decode("utf-8")
-            except Exception:
-                continue
+    with open(text_file, 'rb') as f:
+        content = f.read().splitlines()
+    output = []
 
-        output.append(
-            {
-                "Hash": hashed_value,
-                "Plaintext": i,
-                "Type": to_insert[1],
-                "Verified": True,
-            }
-        )
+    debug = False
 
-new_filename = filename.split(".")[0]
+    for i in content:
+        # If it is "weird" do not add it to the DB.
+        try:
+            i = i.decode("utf-8")
+        except:
+            continue
+        if not regexp.search(i):
+            continue
+        plaintext = bytes(i, "utf-8").strip()
+        for hash in hashing:
+            to_insert = hash(plaintext)
+            hashed_value = to_insert[0]
+            if not isinstance(hashed_value, str):
+                try:
+                    hashed_value = hashed_value.decode("utf-8")
+                except Exception:
+                    continue
 
-with open(new_filename + ".json", 'w') as outfile:
-    ujson.dump(output, outfile)
+            output.append(
+                {
+                    "Hash": hashed_value,
+                    "Plaintext": i,
+                    "Type": to_insert[1],
+                    "Verified": True,
+                }
+            )
+
+    new_filename = text_file.split(".")[0]
+
+    with open(new_filename + ".json", 'w') as outfile:
+        ujson.dump(output, outfile)
     
 print("I am done!")

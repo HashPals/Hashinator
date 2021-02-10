@@ -5,13 +5,18 @@ import hashlib
 import re
 import ujson
 import os
+import dynamo_json
+import time
+
+dynamo_client = boto3.resource('dynamodb')
+table = dynamo_client.Table("hash_lookup")
 
 # TODO Change this file name to the one you're working on
-filename = input("Enter file path --> ")
+path = input("Enter file path --> ")
 
 # Basically all puncuation, lowercase, uppercaese, numbers, emails, etc.
 # Removes Asian characters, emojis, etc etc.
-regexp = re.compile(r"""^[A-Za-z.\s_@"!£$%^&*(){}#~';:?>.<,|\/\][123456789+=\-_-]+$""")
+regexp = re.compile(r"""^[A-Za-z.\s_@"!£$%^&*(){}#~';:?>.<,|\/\][0123456789+=\-_-]+$""")
 
 
 # TODO Add more hashing methods if ya find them
@@ -50,12 +55,11 @@ def ntlm(text):
 
 hashing = [md5, sha1, sha256, sha512, ntlm]
 text_files = [f for f in os.listdir(path) if f.endswith('.txt')]
-
+counter = 0
 for text_file in text_files:
-
+    output = {}
     with open(text_file, 'rb') as f:
         content = f.read().splitlines()
-    output = []
 
     debug = False
 
@@ -77,18 +81,17 @@ for text_file in text_files:
                 except Exception:
                     continue
 
-            output.append(
+            output_add = dynamo_json.marshall(
                 {
-                    "Hash": hashed_value,
+
                     "Plaintext": i,
                     "Type": to_insert[1],
                     "Verified": True,
                 }
             )
-
-    new_filename = text_file.split(".")[0]
-
-    with open(new_filename + ".json", 'w') as outfile:
-        ujson.dump(output, outfile)
-    
+            table.put_item(Item=output_add)
+            counter = += 1
+            if counter >= 5:
+                time.sleep(1.1)
+                counter = 0
 print("I am done!")

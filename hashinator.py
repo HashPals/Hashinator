@@ -7,13 +7,16 @@ import ujson
 import os
 import dynamo_json
 import time
+import boto3
+import random
 
 dynamo_client = boto3.resource('dynamodb')
 table = dynamo_client.Table("hash_lookup")
+escapes = ''.join([chr(char) for char in range(1, 32)])
 
 # TODO Change this file name to the one you're working on
-path = input("Enter file path --> ")
-
+# path = input("Enter file path --> ")
+path = "/mnt/e/Hashinator"
 # Basically all puncuation, lowercase, uppercaese, numbers, emails, etc.
 # Removes Asian characters, emojis, etc etc.
 regexp = re.compile(r"""^[A-Za-z.\s_@"!£$%^&*(){}#~';:?>.<,|\/\][0123456789+=\-_-]+$""")
@@ -53,9 +56,12 @@ def ntlm(text):
 
 
 
-hashing = [md5, sha1, sha256, sha512, ntlm]
+hashing = [md5, sha1, sha256, sha512, ntlm, sha384, sha224]
 text_files = [f for f in os.listdir(path) if f.endswith('.txt')]
+random.shuffle(text_files)
 counter = 0
+print_counter = 0
+total = 0
 for text_file in text_files:
     output = {}
     with open(text_file, 'rb') as f:
@@ -69,7 +75,19 @@ for text_file in text_files:
             i = i.decode("utf-8")
         except:
             continue
+
+        i = i.translate(escapes)
+        i = i.replace("\n", "").replace("\t", "").replace("\r", "")
+
+        if len(i) <= 3:
+            continue
+        if len(i) >= 20:
+            continue
         if not regexp.search(i):
+            continue
+        if "\t" in i:
+            continue
+        if "\\x" in i:
             continue
         plaintext = bytes(i, "utf-8").strip()
         for hash in hashing:
@@ -81,17 +99,20 @@ for text_file in text_files:
                 except Exception:
                     continue
 
-            output_add = dynamo_json.marshall(
-                {
-
-                    "Plaintext": i,
+            output_add = {
+                    "Hash": hashed_value.strip(),
+                    "Plaintext": i.strip(),
                     "Type": to_insert[1],
                     "Verified": True,
                 }
-            )
+
+            
             table.put_item(Item=output_add)
-            counter = += 1
-            if counter >= 5:
-                time.sleep(1.1)
-                counter = 0
+            print_counter += 1
+            if print_counter >= 100:
+                print("100 items processed")
+                total += print_counter
+                print_counter = 0
+                print(f"**** Total is {total}")
+    os.remove(text_file)
 print("I am done!")

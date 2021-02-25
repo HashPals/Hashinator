@@ -108,11 +108,5 @@ for text_file in text_files:
 
             
             table.put_item(Item=output_add)
-            print_counter += 1
-            if print_counter >= 100:
-                print("100 items processed")
-                total += print_counter
-                print_counter = 0
-                print(f"**** Total is {total}")
     os.remove(text_file)
 print("I am done!")

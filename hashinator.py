@@ -100,7 +100,7 @@ for text_file in text_files:
                     continue
 
             output_add = {
-                    "Hash": hashed_value.strip(),
+                    "Hash": hashed_value.strip().lower(),
                     "Plaintext": i.strip(),
                     "Type": to_insert[1],
                     "Verified": True,
